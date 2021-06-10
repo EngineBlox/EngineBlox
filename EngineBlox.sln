@@ -17,6 +17,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EngineBlox.Timezones", "Eng
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EngineBlox.Timezones.Test.Unit", "EngineBlox.Timezones.Test.Unit\EngineBlox.Timezones.Test.Unit.csproj", "{B6654CB7-D141-4CCD-B24F-E893E453A916}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{9A3B726B-9F0D-4425-9A2E-BD15EEE73A72}"
+	ProjectSection(SolutionItems) = preProject
+		azure-pipelines.yml = azure-pipelines.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

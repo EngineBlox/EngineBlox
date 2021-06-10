@@ -1,0 +1,77 @@
+name: $(Build.DefinitionName)-1.0$(rev:.r)
+
+variables:
+  - group: integration-common
+
+trigger:
+- initial_proto
+
+pool:
+  name: Azure Pipelines
+  vmImage: windows-2019
+
+stages:
+- stage: Build
+  displayName: 'Build and package assemblies'
+  jobs: 
+  - job:
+    workspace:
+      clean: all
+    steps:
+      - task: DotNetCoreCLI@2
+        displayName: 'dotnet restore'
+        inputs:
+          command: restore
+          projects: '**/*.sln'
+          vstsFeed: '77cac313-ea7f-4565-85dd-6ede8d891268'
+
+      - task: DotNetCoreCLI@2
+        displayName: "Build Packages"
+        enabled: false
+        inputs:
+          command: build
+          projects: '**/*.sln'
+          arguments: '--configuration $(build_configuration)'
+
+      - task: DotNetCoreCLI@2
+        displayName: 'dotnet test'
+        inputs:
+          command: test
+          projects: '**/*Test.Unit.csproj'
+          arguments: '--configuration $(build_configuration) --collect "Code coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=$(Build.SourcesDirectroy)\TestResults\Coverage\'
+
+      - task: DotNetCoreCLI@2
+        displayName: 'dotnet pack'
+        inputs:
+          command: pack
+          packDirectory: '$(Build.ArtifactStagingDirectory)/packages'
+          configuration: $(build_configuration)
+          nobuild: false
+          versioningScheme: byBuildNumber
+          verbosityPack: Normal
+
+      - publish: '$(Build.ArtifactStagingDirectory)/packages'
+        artifact: 'packages'
+
+      - task: whitesource.ws-bolt.bolt.wss.WhiteSource Bolt@19
+        displayName: 'WhiteSource Bolt'
+
+- stage: 'PublishNuGetPackages'
+  displayName: 'Push to NuGet feed'
+  dependsOn: 'Build'
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/initial_proto'))
+  jobs:
+  - job: Push
+    displayName:
+    steps:
+    - checkout: none
+    - download: current
+      artifact: 'packages'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'dotnet push'
+      inputs:
+        command: push
+        packagesToPush: '$(Pipeline.Workspace)/packages/*.nupkg'
+        nuGetFeedType: internal
+        publishVstsFeed: '$(nuget_feed)'
