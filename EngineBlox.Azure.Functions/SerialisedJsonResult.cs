@@ -7,15 +7,17 @@ namespace EngineBlox.Azure.Functions
 {
     public class SerialisedJsonResult : ContentResult
     {
-        public SerialisedJsonResult(object value)
+        public SerialisedJsonResult(object value, bool camelCase = true)
         {
-            ContentType = MediaTypeNames.Application.Json;
-            Content = JsonSerializer.Serialize(value, Options);
-        }
+            var options = new JsonSerializerOptions
+            {
+                Converters = { new JsonStringEnumConverter() }
+            };
 
-        public static JsonSerializerOptions Options => new JsonSerializerOptions
-        {
-            Converters = { new JsonStringEnumConverter() }
-        };
+            if (camelCase) options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+
+            ContentType = MediaTypeNames.Application.Json;
+            Content = JsonSerializer.Serialize(value, options);
+        }
     }
 }
