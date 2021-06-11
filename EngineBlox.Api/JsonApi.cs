@@ -6,17 +6,18 @@ using System;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EngineBlox.Api
 {
     public interface IJsonApi<TApi>
     {
-        Task<HttpResponseMessage> GetAsync(RequestBuilder? requestBuilder = null, [CallerMemberName] string memberName = "");
-        Task<TResult> GetOrThrowAsync<TResult>(RequestBuilder? requestBuilder = null, [CallerMemberName] string memberName = "");
+        Task<HttpResponseMessage> GetAsync(RequestBuilder? requestBuilder = null, CancellationToken cancellationToken = default, [CallerMemberName] string memberName = "");
+        Task<TResult> GetOrThrowAsync<TResult>(RequestBuilder? requestBuilder = null, CancellationToken cancellationToken = default, [CallerMemberName] string memberName = "");
 
-        Task<HttpResponseMessage> PostAsync<TPayload>(TPayload payload, RequestBuilder? requestBuilder = null, [CallerMemberName] string memberName = "");
-        Task PostOrThrowAsync<TPayload>(TPayload payload, RequestBuilder? requestBuilder = null, [CallerMemberName] string memberName = "");
+        Task<HttpResponseMessage> PostAsync<TPayload>(TPayload payload, RequestBuilder? requestBuilder = null, CancellationToken cancellationToken = default, [CallerMemberName] string memberName = "");
+        Task PostOrThrowAsync<TPayload>(TPayload payload, RequestBuilder? requestBuilder = null, CancellationToken cancellationToken = default, [CallerMemberName] string memberName = "");
     }
 
     public class JsonApi<TApi> : IJsonApi<TApi>
@@ -31,26 +32,26 @@ namespace EngineBlox.Api
             _apiDefinition = apiDefinition;
         }
 
-        public async Task<HttpResponseMessage> GetAsync(RequestBuilder? requestBuilder = null, [CallerMemberName] string memberName = "") 
-            => await _client.GetAsync(BuildRequest(requestBuilder, memberName));
+        public async Task<HttpResponseMessage> GetAsync(RequestBuilder? requestBuilder = null, CancellationToken cancellationToken = default, [CallerMemberName] string memberName = "") 
+            => await _client.GetAsync(BuildRequest(requestBuilder, memberName), cancellationToken);
 
-        public async Task<TResult> GetOrThrowAsync<TResult>(RequestBuilder? requestBuilder = null, [CallerMemberName] string memberName = "")
+        public async Task<TResult> GetOrThrowAsync<TResult>(RequestBuilder? requestBuilder = null, CancellationToken cancellationToken = default, [CallerMemberName] string memberName = "")
         {
-            var response = await _client.GetAsync(BuildRequest(requestBuilder, memberName));
+            var response = await _client.GetAsync(BuildRequest(requestBuilder, memberName), cancellationToken);
 
             await response.EnsureSuccessOrThrowWithBody();
 
             return await response.GetResultAsync<TResult>();
         }
 
-        public async Task<HttpResponseMessage> PostAsync<TPayload>(TPayload payload, RequestBuilder? requestBuilder = null, [CallerMemberName] string memberName = "")
+        public async Task<HttpResponseMessage> PostAsync<TPayload>(TPayload payload, RequestBuilder? requestBuilder = null, CancellationToken cancellationToken = default, [CallerMemberName] string memberName = "")
         {
-            return await PostInternal(payload, requestBuilder, memberName);
+            return await PostInternal(payload, requestBuilder, cancellationToken, memberName);
         }
 
-        public async Task PostOrThrowAsync<TPayload>(TPayload payload, RequestBuilder? requestBuilder = null, [CallerMemberName] string memberName = "")
+        public async Task PostOrThrowAsync<TPayload>(TPayload payload, RequestBuilder? requestBuilder = null, CancellationToken cancellationToken = default, [CallerMemberName] string memberName = "")
         {
-            var response = await PostInternal(payload, requestBuilder, memberName);
+            var response = await PostInternal(payload, requestBuilder, cancellationToken, memberName);
 
             await response.EnsureSuccessOrThrowWithBody();
         }
@@ -62,7 +63,7 @@ namespace EngineBlox.Api
             return requestBuilder.BuildUri(_apiDefinition.BaseAddress, _apiDefinition.GetRelativeUri(memberName));
         }
 
-        private async Task<HttpResponseMessage> PostInternal<TPayload>(TPayload payload, RequestBuilder? requestBuilder, string memberName)
+        private async Task<HttpResponseMessage> PostInternal<TPayload>(TPayload payload, RequestBuilder? requestBuilder, CancellationToken cancellationToken = default, string memberName = "")
         {
             if (requestBuilder is null) requestBuilder = RequestBuilder.Default;
 
@@ -75,7 +76,7 @@ namespace EngineBlox.Api
             }
 
             var uri = requestBuilder.BuildUri(_apiDefinition.BaseAddress, _apiDefinition.GetRelativeUri(memberName));
-            return await _client.PostAsync(uri, content);
+            return await _client.PostAsync(uri, content, cancellationToken);
         }
 
         private DefaultContractResolver CreateContractResolver(JsonNamingStrategy namingStrategy)
