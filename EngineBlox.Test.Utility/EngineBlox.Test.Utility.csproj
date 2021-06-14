@@ -7,12 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FluentAssertions" Version="5.10.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.15" />
     <PackageReference Include="Moq" Version="4.16.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\EngineBlox.Api\EngineBlox.Api.csproj" />
+    <ProjectReference Include="..\EngineBlox.Azure.Functions\EngineBlox.Azure.Functions.csproj" />
   </ItemGroup>
 
 </Project>
