@@ -1,4 +1,4 @@
-﻿using EngineBlox.Api.Exceptions;
+﻿using EngineBlox.Responses;
 using Microsoft.Extensions.Configuration;
 
 namespace EngineBlox.Api.Configuration
@@ -9,7 +9,7 @@ namespace EngineBlox.Api.Configuration
         {
             var value = configuration.GetValue<string>(name);
 
-            if (string.IsNullOrEmpty(value)) throw new ApiException($"{name} is not present in configuration or has no value");
+            if (string.IsNullOrEmpty(value)) throw new ServiceException($"{name} is not present in configuration or has no value");
 
             return value;
         }

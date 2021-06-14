@@ -36,6 +36,13 @@ namespace EngineBlox.Azure.Functions
 
         public static IActionResult Handle(this Exception ex) => Handle(ServiceResponse.UnknownError(ex));
 
+        public static IActionResult Handle(this ServiceException ex) => ex.ErrorCode switch
+        {
+            400 => Handle(ServiceResponse.InvalidOperation(ex.Message)),
+            404 => Handle(ServiceResponse.ResourceNotFound(ex.Message)),
+            _ => Handle(ServiceResponse.UnknownError(ex.Message)),
+        };
+
         public static ProblemDetails MapError(ServiceResponse serviceResponse) => new ProblemDetails
         {
             Title = serviceResponse.ServiceResult.ToString(),

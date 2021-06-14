@@ -1,4 +1,4 @@
-﻿using EngineBlox.Api.Exceptions;
+﻿using EngineBlox.Responses;
 using Newtonsoft.Json;
 using System.Linq;
 using System.Net.Http;
@@ -11,15 +11,15 @@ namespace EngineBlox.Api
         public static async Task<TResult> GetResultAsync<TResult>(this HttpResponseMessage response)
         {
             return JsonConvert.DeserializeObject<TResult>(await response.Content.ReadAsStringAsync())
-                ?? throw new ApiException($"Attempted to deserialise json api result {nameof(TResult)} but null was returned");
+                ?? throw new ServiceException($"Attempted to deserialise json api result {nameof(TResult)} but null was returned");
         }
 
         public static string GetSingleHeader(this HttpResponseMessage response, string name)
         {
             var values = response.Headers.GetValues(name);
 
-            if (values.Count() > 1) throw new ApiException($"Expected 1 header matching {name} but received {values.Count()}");
-            // 0?
+            if (values.Count() != 1) throw new ServiceException($"Expected 1 header matching {name} but received {values.Count()}");
+            
             return values.First();
         }
 
@@ -31,7 +31,7 @@ namespace EngineBlox.Api
 
                 if (!string.IsNullOrEmpty(error))
                 {
-                    throw new ApiException($"{response.StatusCode}: {error}.");
+                    throw new ServiceException($"{response.StatusCode}: {error}.", (int)response.StatusCode);
                 }
                 else
                 {

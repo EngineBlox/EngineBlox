@@ -1,4 +1,4 @@
-﻿using EngineBlox.Api.Exceptions;
+﻿using EngineBlox.Responses;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -45,7 +45,7 @@ namespace EngineBlox.Api.Requests
             foreach (var uriSegmentParameter in UriSegmentParameters)
             {
                 if (!relativeUri.Contains($"{{{uriSegmentParameter.Name}}}"))
-                    throw new ApiException($"Invalid request in api. Requested to replace {{{uriSegmentParameter.Name}}} with {uriSegmentParameter.Value} in uri {relativeUri} but {{{uriSegmentParameter.Name}}} is not present");
+                    throw new ServiceException($"Invalid request in api. Requested to replace {{{uriSegmentParameter.Name}}} with {uriSegmentParameter.Value} in uri {relativeUri} but {{{uriSegmentParameter.Name}}} is not present");
 
                 relativeUri = relativeUri.Replace($"{{{uriSegmentParameter.Name}}}", WebUtility.UrlEncode(uriSegmentParameter.Value));
             }

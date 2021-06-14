@@ -1,4 +1,4 @@
-﻿using EngineBlox.Api.Exceptions;
+﻿using EngineBlox.Responses;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -37,7 +37,7 @@ namespace EngineBlox.Api.Configuration
         {
             var endpoint = Endpoints.SingleOrDefault(e => e.Name == StripAsyncSuffix(endpointName));
 
-            if (endpoint == null) throw new ApiException($"No endpoint configuration found for {endpointName}");
+            if (endpoint == null) throw new ServiceException($"No endpoint configuration found for {endpointName}");
 
             return endpoint.Uri;
         }
@@ -68,7 +68,7 @@ namespace EngineBlox.Api.Configuration
             }
             catch (UriFormatException ex)
             {
-                throw new ApiException($"Base address for api \"{ApiName}\" from config \"Api:{ApiName}:BaseAddress\" is not a valid Uri", ex);
+                throw new ServiceException($"Base address for api \"{ApiName}\" from config \"Api:{ApiName}:BaseAddress\" is not a valid Uri", ex);
             }
 
             return baseAddress;
@@ -103,7 +103,7 @@ namespace EngineBlox.Api.Configuration
             }
             catch (Exception ex)
             {
-                throw new ApiException($"Unable to combine api \"{ApiName}\" base address \"{BaseAddress}\" with endpoint \"{endpointName}\" value \"{relativeUri}\" from configuration \"Api:{ApiName}:{endpointName}\" into a valid Uri", ex);
+                throw new ServiceException($"Unable to combine api \"{ApiName}\" base address \"{BaseAddress}\" with endpoint \"{endpointName}\" value \"{relativeUri}\" from configuration \"Api:{ApiName}:{endpointName}\" into a valid Uri", ex);
             }
 
             return relativeUri;

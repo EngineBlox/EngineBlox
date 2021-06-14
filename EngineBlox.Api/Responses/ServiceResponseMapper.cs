@@ -1,5 +1,4 @@
-﻿using EngineBlox.Api.Exceptions;
-using EngineBlox.Responses;
+﻿using EngineBlox.Responses;
 using Newtonsoft.Json;
 using System;
 using System.Net;
@@ -41,7 +40,7 @@ namespace EngineBlox.Api.Responses
                 try
                 {
                     var result = JsonConvert.DeserializeObject<TResult>(body)
-                        ?? throw new ApiException($"Expected to deserialise {nameof(TResult)} but null was returned");
+                        ?? throw new ServiceException($"Expected to deserialise {nameof(TResult)} but null was returned");
 
                     return new ServiceResponse<TResult>(result);
                 }

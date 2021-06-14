@@ -1,5 +1,5 @@
-﻿using EngineBlox.Api.Exceptions;
-using EngineBlox.Api.Requests;
+﻿using EngineBlox.Api.Requests;
+using EngineBlox.Responses;
 using FluentAssertions;
 using System;
 using System.Net;
@@ -80,7 +80,7 @@ namespace EngineBlox.Api.Test.Unit.Requests
 
             Action buildUri = () => requestBuilder.BuildUri(new Uri("http://www.test.co.uk"), "/orders");
 
-            buildUri.Should().Throw<ApiException>()
+            buildUri.Should().Throw<ServiceException>()
                 .WithMessage("Invalid request in api. Requested to replace {orderId} with 332 in uri /orders but {orderId} is not present");
         }
 

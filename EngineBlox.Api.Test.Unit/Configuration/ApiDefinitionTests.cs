@@ -1,5 +1,5 @@
 ﻿using EngineBlox.Api.Configuration;
-using EngineBlox.Api.Exceptions;
+using EngineBlox.Responses;
 using FluentAssertions;
 using System;
 using Xunit;
@@ -44,7 +44,7 @@ namespace EngineBlox.Api.Test.Unit.Configuration
             Action addApiInStartup = () => new ApiDefinition<IOrders>(
                 Orders.BuildConfiguration("Api:Orders:BaseAddress", "invalidbaseaddress"));
 
-            addApiInStartup.Should().Throw<ApiException>()
+            addApiInStartup.Should().Throw<ServiceException>()
                 .WithMessage("Base address for api \"Orders\" from config \"Api:Orders:BaseAddress\" is not a valid Uri");
         }
 
@@ -68,7 +68,7 @@ namespace EngineBlox.Api.Test.Unit.Configuration
             Action addApiInStartup = () => new ApiDefinition<IOrders>(
                 Orders.BuildConfiguration("Api:Orders:SubmitPick", "http:\\\\//$\\*not-a-valid-relative-uri"));
 
-            addApiInStartup.Should().Throw<ApiException>()
+            addApiInStartup.Should().Throw<ServiceException>()
                 .WithMessage("Unable to combine api \"Orders\" base address \"http://www.test.co.uk/\" with endpoint \"SubmitPick\" value \"http:\\\\//$\\*not-a-valid-relative-uri\" from configuration \"Api:Orders:SubmitPick\" into a valid Uri");
         }
 

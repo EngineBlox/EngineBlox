@@ -1,5 +1,5 @@
 ﻿using EngineBlox.Api.Configuration;
-using EngineBlox.Api.Exceptions;
+using EngineBlox.Responses;
 using EngineBlox.Test.Utility.Configuration;
 using FluentAssertions;
 using System;
@@ -28,7 +28,7 @@ namespace EngineBlox.Api.Test.Unit.Configuration
 
             Action getConfig = () => config.GetValueOrThrow("NotPresent");
 
-            getConfig.Should().Throw<ApiException>()
+            getConfig.Should().Throw<ServiceException>()
                 .WithMessage("NotPresent is not present in configuration or has no value");
         }
 
@@ -41,7 +41,7 @@ namespace EngineBlox.Api.Test.Unit.Configuration
 
             Action getConfig = () => config.GetValueOrThrow("EmptyValue");
 
-            getConfig.Should().Throw<ApiException>()
+            getConfig.Should().Throw<ServiceException>()
                 .WithMessage("EmptyValue is not present in configuration or has no value");
         }
     }
