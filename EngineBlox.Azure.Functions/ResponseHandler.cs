@@ -34,7 +34,13 @@ namespace EngineBlox.Azure.Functions
             };
         }
 
-        public static IActionResult Handle(this Exception ex) => Handle(ServiceResponse.UnknownError(ex));
+        public static IActionResult Handle(this Exception ex)
+        {
+            if (ex.GetType() == typeof(ServiceException))
+                return Handle((ex as ServiceException)!);
+
+            return Handle(ServiceResponse.UnknownError(ex));
+        }
 
         public static IActionResult Handle(this ServiceException ex) => ex.ErrorCode switch
         {
