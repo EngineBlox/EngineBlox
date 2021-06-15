@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
+using Refit;
 using System;
 using System.Net;
 
@@ -36,20 +37,29 @@ namespace EngineBlox.Azure.Functions
 
         public static IActionResult Handle(this Exception ex)
         {
-            if (ex.GetType() == typeof(ServiceException))
+            var exType = ex.GetType();
+
+            if (exType == typeof(ApiException))
+                return Handle((ex as ApiException)!);
+
+            if (exType == typeof(ServiceException))
                 return Handle((ex as ServiceException)!);
 
             return Handle(ServiceResponse.UnknownError(ex));
         }
 
-        public static IActionResult Handle(this ServiceException ex) => ex.ErrorCode switch
+        public static IActionResult Handle(this ApiException ex) => Handle((int)ex.StatusCode, ex.Content ?? ex.Message);
+
+        public static IActionResult Handle(this ServiceException ex) => Handle(ex.ErrorCode, ex.Message);
+
+        public static IActionResult Handle(int errorCode, string message) => errorCode switch
         {
-            400 => Handle(ServiceResponse.InvalidOperation(ex.Message)),
-            404 => Handle(ServiceResponse.ResourceNotFound(ex.Message)),
-            _ => Handle(ServiceResponse.UnknownError(ex.Message)),
+            400 => Handle(ServiceResponse.InvalidOperation(message)),
+            404 => Handle(ServiceResponse.ResourceNotFound(message)),
+            _ => Handle(ServiceResponse.UnknownError(message)),
         };
 
-        public static ProblemDetails MapError(ServiceResponse serviceResponse) => new ProblemDetails
+        public static Microsoft.AspNetCore.Mvc.ProblemDetails MapError(ServiceResponse serviceResponse) => new Microsoft.AspNetCore.Mvc.ProblemDetails
         {
             Title = serviceResponse.ServiceResult.ToString(),
             Status = MapStatusCode(serviceResponse.ServiceResult),
