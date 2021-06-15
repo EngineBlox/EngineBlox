@@ -19,7 +19,9 @@ namespace EngineBlox.Api
             var values = response.Headers.GetValues(name);
 
             if (values.Count() != 1) throw new ServiceException($"Expected 1 header matching {name} but received {values.Count()}");
-            
+            var value = values.First();
+            if (string.IsNullOrEmpty(value)) throw new ServiceException($"Expected value for header {name} but got null or empty");
+
             return values.First();
         }
 

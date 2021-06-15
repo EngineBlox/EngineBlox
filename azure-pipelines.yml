@@ -1,4 +1,4 @@
-name: $(Build.DefinitionName)-1.0.7
+name: $(Build.DefinitionName)-1.0.8
 
 variables:
   - group: integration-common

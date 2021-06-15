@@ -48,7 +48,19 @@ namespace EngineBlox.Azure.Functions
             return Handle(ServiceResponse.UnknownError(ex));
         }
 
-        public static IActionResult Handle(this ApiException ex) => Handle((int)ex.StatusCode, ex.Content ?? ex.Message);
+        public static IActionResult Handle(this ApiException ex)
+        {
+            return new ObjectResult(new Microsoft.AspNetCore.Mvc.ProblemDetails
+            {
+                Title = $"{ex.StatusCode}",
+                Status = (int)ex.StatusCode,
+                Detail = JsonConvert.SerializeObject(new
+                {
+                    ex.Message,
+                    ex.Uri
+                })
+            }) { StatusCode = (int)ex.StatusCode };
+        }
 
         public static IActionResult Handle(this ServiceException ex) => Handle(ex.ErrorCode, ex.Message);
 
