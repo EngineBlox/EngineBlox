@@ -50,16 +50,18 @@ namespace EngineBlox.Azure.Functions
 
         public static IActionResult Handle(this ApiException ex)
         {
+            bool shouldPropagateErrorCode = ex.StatusCode != HttpStatusCode.OK;
+
             return new ObjectResult(new Microsoft.AspNetCore.Mvc.ProblemDetails
             {
-                Title = $"{ex.StatusCode}",
-                Status = (int)ex.StatusCode,
+                Title = shouldPropagateErrorCode ? $"{ex.StatusCode}" : $"{HttpStatusCode.InternalServerError}",
+                Status = shouldPropagateErrorCode ? (int)ex.StatusCode : 500,
                 Detail = JsonConvert.SerializeObject(new
                 {
                     ex.Message,
                     ex.Uri
                 })
-            }) { StatusCode = (int)ex.StatusCode };
+            }) { StatusCode = shouldPropagateErrorCode ? (int)ex.StatusCode : 500 };
         }
 
         public static IActionResult Handle(this ServiceException ex) => Handle(ex.ErrorCode, ex.Message);
